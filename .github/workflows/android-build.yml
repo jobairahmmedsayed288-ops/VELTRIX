@@ -1,0 +1,52 @@
+name: VELTRIX Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install 7zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+
+      - name: Extract VELTRIX project
+        run: |
+          mkdir project
+          7z x VELTRIX_ready_to_deploy.zip -oproject -p"${{ secrets.ZIP_PASSWORD }}"
+          find project -name package.json
+
+      - name: Build Android APK
+        run: |
+          cd "$(dirname "$(find project -name package.json | head -n 1)")"
+          npm install
+          npm install @capacitor/android@^7.4.3
+          npx cap add android
+          npm run build
+          npx cap sync android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VELTRIX-APK
+          path: project/**/android/app/build/outputs/apk/debug/app-debug.apk

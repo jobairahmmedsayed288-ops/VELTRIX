@@ -1,3 +1,4 @@
+
 name: VELTRIX Android APK
 
 on:
@@ -38,6 +39,13 @@ jobs:
           cd "$(dirname "$(find project -name package.json | head -n 1)")"
           npm install
           npm install @capacitor/cli@^7.4.3 @capacitor/android@^7.4.3
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.veltrix.app",
+            "appName": "VELTRIX",
+            "webDir": "dist"
+          }
+          EOF
           npx cap add android
           npm run build
           npx cap sync android

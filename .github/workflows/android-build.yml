@@ -37,6 +37,7 @@ jobs:
       - name: Build Android APK
         run: |
           cd "$(dirname "$(find project -name package.json | head -n 1)")"
+          printf '/// <reference types="vite/client" />\n' > src/vite-env.d.ts
           npm install
           npm install @capacitor/cli@^7.4.3 @capacitor/android@^7.4.3
           cat > capacitor.config.json <<'EOF'
